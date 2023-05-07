@@ -60,7 +60,7 @@ const handleLoadMore = () => {
   setPage(prev =>  prev + 1);
 };
 
-const handleModalOpen = (largeImage) => {
+const handleModalOpen = (largeImage, tags) => {
   setShowModal(true);
   setLargeImage(largeImage);
   setTags(tags);
@@ -84,11 +84,11 @@ return (
         <Button onClick={handleLoadMore} />
   )}
   {showModal && (
-      <Modal
-        largeImage={largeImage}
-        tags={tags}
-        onCloseModal={handleModalClose}
-      />
+    <Modal
+      largeImage={largeImage}
+      tags={tags}
+      onCloseModal={handleModalClose}
+    />
   )}
 
   {error && (
