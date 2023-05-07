@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { useEffect } from "react";
 import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
 import {
@@ -10,46 +10,42 @@ import {
 
 const modalRoot = document.querySelector('#modal-root');
 
-export class Modal extends Component {
+export function Modal ( onCloseModal, largeImage, tags ) {
 
-  componentDidMount() {
-    window.addEventListener('keydown', this.handleKeyDown);
-  };
+  useEffect(() => {
+    function handleKeyDown(evt) {
+      if (evt.key === 'Escape') {
+        onCloseModal();
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleBackdropeClick);
-  }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onCloseModal]);
 
-  handleKeyDown = e => {
-    if (e.code === `Escape`) {
-      this.props.onCloseModal();
+
+  function handleBackdropeClick(evt) {
+    if (evt.currentTarget === evt.target) {
+      onCloseModal();
     }
   };
 
-  handleBackdropeClick = e => {
-    if (e.target === e.currentTarget) {
-      this.props.onCloseModal();
-    }
-  };
-
-  render() {
-    const { largeImageURL, tags } = this.props;
-
+  
     return createPortal(
-      <ModalBackdrop onClick={this.handleBackdropeClick}>
+      <ModalBackdrop onClick={handleBackdropeClick}>
         <ModalContent>
-          <ModalPicture src={largeImageURL} alt={tags} />
+          <ModalPicture src={largeImage} alt={tags} />
           <ModalDescr>{tags}</ModalDescr>
         </ModalContent>
       </ModalBackdrop>,
       modalRoot
     );
-  }
+  
 };
 
 
 Modal.propTypes = {
   onCloseModal: PropTypes.func.isRequired,
-  largeImageURL: PropTypes.string.isRequired,
+  largeImage: PropTypes.string.isRequired,
   tags: PropTypes.string.isRequired,
 };

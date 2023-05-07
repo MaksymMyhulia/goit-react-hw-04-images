@@ -1,4 +1,4 @@
-import React, {Component} from "react";
+import { useState, useEffect } from "react";
 import { GlobalStyle } from "./GlobalStyle";
 import { getImages } from "services/getImages";
 import { ImageGallery } from "components/ImageGallery/ImageGallery"
@@ -6,106 +6,100 @@ import { Searchbar } from "components/Searchbar/Searchbar";
 import { ToastContainer, toast } from "react-toastify";
 import { Loader } from "components/Loader/Loader";
 import { Button } from "components/Button/Button";
-import {Modal} from "components/Modal/Modal"; 
+import { Modal } from "components/Modal/Modal"; 
 import 'react-toastify/dist/ReactToastify.css';
 
 
-export default class App extends Component {
-  state = {
-    images: [],
-    query: '',
-    page: 1,
-    isLoading: false,
-    showModal: false,
-    largeImageURL: '',
-    tags: '',
-    total: 0,
-    error: null,
-  };
+export function App () {
 
-componentDidUpdate(_, prevState) {
-  const { query, page } = this.state;
-  if (prevState.query !== query || prevState.page !== page || query.trim() !== "") {
-    this.fetchImages(query, page);
-  };
-  if (query.trim() === "") { return toast.error("Value can't be an empty string");
-};
-};
+const [images, setImages] = useState([]);
+const [query, setQuery] = useState('');
+const [page, setPage] = useState(1);
+const [isLoading, setIsLoading] = useState(false);
+const [showModal, setShowModal] = useState(false);
+const [largeImage, setLargeImage] = useState('');
+const [tags, setTags] = useState('');
+const [total, setTotal] = useState(0);
+const [error, setError] = useState(null);
 
-fetchImages = async (query, page) => {
+
+useEffect(() => {
+  if(query !== ''){
+    fetchImages(query, page);
+  };
+}, [query, page])
+
+
+const fetchImages = async (query, page) => {
   try {
-    this.setState({ isLoading: true });
-    const data = await getImages(query, page);
-    if (data.hits.length === 0) {
-      return toast.error(
+   setIsLoading(true);
+   const data = await getImages(query, page);
+   if (data.hits.length === 0) {
+        return toast.error(
         "We didn't find anything for this search"
-      );
-    }
-    this.setState(({ images }) => ({
-      images: [...images, ...data.hits],
-      total: data.totalHits,
-    }))
-  }
-  catch (error) {
-    this.setState({ error });
+         )
+   }
+
+   setTotal(data.totalHits);
+   setImages(prev=> [...prev, ...data.hits]);
+   
+  } catch (error) {
+    setError(error);
   } finally {
-    this.setState({ isLoading: false });
+    setIsLoading(false);
   }
 };
 
-handleSubmit = query => {
-  this.setState({ query, page: 1, images: [] });
+ const handleSubmit = query => {
+  setQuery(query);
+  setPage(1);
+  setImages([]);
 };
 
-handleLoadMore = () => {
-  this.setState(prevState => ({ page: prevState.page + 1 }));
+const handleLoadMore = () => {
+  setPage(prev =>  prev + 1);
 };
 
-// handleModalOpen = (largeImageURL, tags) => {
-//   this.setState({ showModal: true, largeImageURL, tags });
-// };
-
-handleModalOpen = (largeImageURL) => {
-  this.setState({ showModal: true, largeImageURL: largeImageURL.largeImageURL, tags: largeImageURL.tags })
+const handleModalOpen = (largeImage) => {
+  setShowModal(true);
+  setLargeImage(largeImage);
+  setTags(tags);
 };
 
-handleModalClose = () => {
-  this.setState({ showModal: false , largeImageURL: '', tags: ''});
+const handleModalClose = () => {
+  setShowModal(false);
+  setLargeImage('');
+  setTags('');
 };
   
- 
+const totalPage = total / images.length;
+return (
+  <>
+  <Searchbar onSubmit={handleSubmit} />
+  {isLoading && <Loader />}
+  {images.length !== 0 && (
+    <ImageGallery gallery={images} onOpenModal={handleModalOpen} />
+  )}
+  {totalPage > 1 && !isLoading && images.length !== 0 && (
+        <Button onClick={handleLoadMore} />
+  )}
+  {showModal && (
+      <Modal
+        largeImage={largeImage}
+        tags={tags}
+        onCloseModal={handleModalClose}
+      />
+  )}
 
-  render() {
-  const { images, isLoading, total, error, showModal, largeImageURL, tags } = this.state;
-  const totalPage = total / images.length;
-
-  return (
-    <>
-    <Searchbar onSubmit={this.handleSubmit} />
-    {isLoading && <Loader />}
-    {images.length !== 0 && (
-      <ImageGallery gallery={images} onOpenModal={this.handleModalOpen} />
-    )}
-    {totalPage > 1 && !isLoading && images.length !== 0 && (
-          <Button onClick={this.handleLoadMore} />
-    )}
-    {showModal && (
-          <Modal
-            largeImageURL={largeImageURL}
-            tags={tags}
-            onCloseModal={this.handleModalClose}
-          />
-    )}
-
-    {error && (
-          <>
-           "We didn't find anything for this search :("
-            <span>Try another option</span>
-          </>
-    )}
-        <ToastContainer autoClose={2000} theme="dark" />
-        <GlobalStyle />
-    </>
-  )
-  }
-}
+  {error && (
+        <>
+         "We didn't find anything for this search :("
+          <span>Try another option</span>
+        </>
+  )}
+      <ToastContainer autoClose={2000} theme="dark" />
+      <GlobalStyle />
+  </>
+)
+  
+};
