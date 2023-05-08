@@ -7,7 +7,7 @@ export const ImageGalleryItem = ({ largeImageURL, tags, webformatURL, onOpenModa
   
     return (
       <ListItem
-        onClick={() => onOpenModal({ largeImageURL, tags })}
+        onClick={() => onOpenModal( largeImageURL, tags )}
       >
         <div>
           <Picture src={webformatURL} alt={tags} loading="lazy" />

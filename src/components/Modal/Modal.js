@@ -10,11 +10,12 @@ import {
 
 const modalRoot = document.querySelector('#modal-root');
 
-export function Modal ( onCloseModal, largeImage, tags ) {
+export function Modal ({ onCloseModal, largeImage, tags }) {
 
   useEffect(() => {
     function handleKeyDown(evt) {
       if (evt.key === 'Escape') {
+        console.log(onCloseModal);
         onCloseModal();
       }
     }
