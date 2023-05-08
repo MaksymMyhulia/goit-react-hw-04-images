@@ -16,7 +16,7 @@ export class Searchbar extends Component {
       handleSubmit = evt => {
         const { search } = this.state;
         evt.preventDefault();
-        if (search.trim === "") {
+        if (search.trim() === "") {
           return toast.error("Value can't be an empty string");
         }
         this.props.onSubmit(search);

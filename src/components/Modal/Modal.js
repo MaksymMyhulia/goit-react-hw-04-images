@@ -15,7 +15,6 @@ export function Modal ({ onCloseModal, largeImage, tags }) {
   useEffect(() => {
     function handleKeyDown(evt) {
       if (evt.key === 'Escape') {
-        console.log(onCloseModal);
         onCloseModal();
       }
     }
